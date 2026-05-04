@@ -1,0 +1,67 @@
+---
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<footer class="w-full max-w-5xl mx-auto py-10 mt-8 border-t border-white/10">
+	<div class="flex flex-col gap-3 text-center">
+		<p class="text-white/60 text-sm">
+			{t('footer.builtWith')}
+			<a
+				href="https://x.com/kyo_didac"
+				target="_blank"
+				rel="noreferrer"
+				aria-label={t('footer.contactAria')}
+				class="text-white/60 hover:text-orange-400"
+			>didac</a>
+			<span class="text-orange-500"> 🧡</span>
+		</p>
+		<p class="text-white/25 text-xs leading-relaxed max-w-2xl mx-auto">
+			{t('footer.disclaimerPre')}
+			<a
+				href="https://www.kyotoanimation.co.jp/"
+				target="_blank"
+				rel="noreferrer"
+				class="text-white/40 hover:text-white/60 underline underline-offset-2"
+			>{t('footer.disclaimerLink')}</a>
+			{t('footer.disclaimerPost')}
+		</p>
+		<p class="text-white/20 text-xs">
+			{t('footer.dataSources')}
+			<a
+				href="https://www.kyotoanimation.co.jp/"
+				target="_blank"
+				rel="noreferrer"
+				class="text-white/40 hover:text-orange-400"
+			>Kyoto Animation</a>,
+			<a
+				href="https://anilist.co/"
+				target="_blank"
+				rel="noreferrer"
+				class="text-white/40 hover:text-blue-400"
+			>AniList</a>,
+			<a
+				href="https://youtube.com/"
+				target="_blank"
+				rel="noreferrer"
+				class="text-white/40 hover:text-red-400"
+			>YouTube</a>
+			{' '}
+			{t('footer.and')}
+			{' '}
+			<a
+				href="https://animethemes.moe/"
+				target="_blank"
+				rel="noreferrer"
+				class="text-white/40 hover:text-purple-400"
+			>AnimeThemes</a>
+		</p>
+	</div>
+</footer>

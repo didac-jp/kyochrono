@@ -1,0 +1,47 @@
+---
+import { languages, useTranslatedPath, parseLocalizedPath, type Lang } from '../i18n/utils';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang: currentFromLayout } = Astro.props;
+const pathname = Astro.url.pathname;
+const { lang: pathLang, restPath } = parseLocalizedPath(pathname);
+
+function hrefForLocale(target: Lang): string {
+	if (pathLang) {
+		return useTranslatedPath(target)(restPath);
+	}
+	return useTranslatedPath(target)('/');
+}
+
+function normPath(p: string): string {
+	const t = p.replace(/\/+$/, '');
+	return t === '' ? '/' : `${t}/`;
+}
+
+function isActive(code: Lang): boolean {
+	if (pathLang) {
+		return normPath(pathname) === normPath(hrefForLocale(code));
+	}
+	return code === currentFromLayout;
+}
+---
+
+<ul class="flex flex-row items-center gap-1 text-xs font-medium">
+	{(Object.keys(languages) as Lang[]).map((code) => (
+		<li>
+			<a
+				href={hrefForLocale(code)}
+				hreflang={code}
+				class:list={[
+					'rounded-lg px-2 py-1 transition-colors',
+					isActive(code) ? 'active text-white bg-white/10' : 'text-white/50 hover:text-white/80',
+				]}
+			>
+				{languages[code]}
+			</a>
+		</li>
+	))}
+</ul>

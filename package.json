@@ -1,0 +1,27 @@
+{
+  "name": "kyochrono",
+  "type": "module",
+  "version": "0.9.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "PUBLIC_SITE_URL=https://kyochrono.dev astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource-variable/onest": "^5.2.11",
+    "@tailwindcss/vite": "^4.2.2",
+    "astro": "^6.1.1",
+    "astro-leaflet": "^1.10.0",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^4.2.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
+  }
+}

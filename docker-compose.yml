@@ -1,0 +1,9 @@
+# version: no es necesario en Compose v2+
+# Astro se usa en el build (Dockerfile); no hace falta declararlo aquí
+
+services:
+  web:
+    build: .
+    ports:
+      - "3002:80"
+    restart: unless-stopped

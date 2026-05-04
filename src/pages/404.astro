@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { defaultLang, useTranslations } from '../i18n/utils';
+import { homePath } from '../utils/routes';
+
+const lang = defaultLang;
+const t = useTranslations(lang);
+---
+
+<Layout title={t('error404.layoutTitle')} lang={lang}>
+	<main class="flex-1 flex items-center justify-center min-h-[60vh]">
+		<div class="text-center space-y-6 px-4">
+			<p
+				class="text-[8rem] md:text-[10rem] font-bold leading-none tracking-tighter bg-gradient-to-b from-fuchsia-400 to-fuchsia-800 bg-clip-text text-transparent select-none"
+			>
+				404
+			</p>
+			<p class="text-white/60 text-lg max-w-md mx-auto" id="i404-msg">
+				{t('error404.message')}
+			</p>
+			<a
+				id="i404-home"
+				href={homePath(lang)}
+				class="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white border border-white/15 hover:border-white/30 px-6 py-3 rounded-xl transition-all duration-300"
+			>
+				<span class="group-hover:-translate-x-0.5 transition-transform">←</span>
+				<span id="i404-back">{t('error404.back')}</span>
+			</a>
+		</div>
+	</main>
+</Layout>
+
+<script>
+	import { ui } from '../i18n/ui';
+
+	function prefersEs(): boolean {
+		const list =
+			navigator.languages && navigator.languages.length
+				? navigator.languages
+				: [navigator.language || 'en'];
+		return list.some((raw) => {
+			const l = String(raw || '')
+				.toLowerCase()
+				.trim()
+				.split(',')[0];
+			return l === 'es' || l.startsWith('es-');
+		});
+	}
+
+	function apply() {
+		const es = prefersEs();
+		const pack = es ? ui.es : ui.en;
+		document.documentElement.lang = es ? 'es' : 'en';
+		const msg = document.getElementById('i404-msg');
+		const back = document.getElementById('i404-back');
+		const link = document.getElementById('i404-home');
+		if (msg) msg.textContent = pack['error404.message'] ?? '';
+		if (back) back.textContent = pack['error404.back'] ?? '';
+		if (link) link.setAttribute('href', es ? '/es/' : '/en/');
+		const title = pack['error404.layoutTitle'];
+		if (title) document.title = title;
+	}
+
+	document.addEventListener('astro:page-load', apply);
+	apply();
+</script>

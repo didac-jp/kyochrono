@@ -1,0 +1,55 @@
+---
+import { navLinksForLang, homePath } from '../utils/routes';
+import icon from '../assets/icon.webp';
+import LanguagePicker from './LanguagePicker.astro';
+import { useTranslations } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+	lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const path = Astro.url.pathname;
+
+function normPath(p: string): string {
+	const t = p.replace(/\/+$/, '');
+	return t === '' ? '/' : `${t}/`;
+}
+
+const navLinks = navLinksForLang(lang, t);
+const nav = navLinks.filter((link) => normPath(link.href) !== normPath(path));
+---
+
+<header class="-mx-6 border-b border-white/5">
+	<div class="px-6">
+		<div class="flex items-center justify-between py-4 max-w-5xl mx-auto">
+			<a
+				class="flex items-center gap-x-2 text-orange-500 hover:text-white"
+				href={homePath(lang)}
+				data-astro-prefetch
+			>
+				<img
+					class="rounded-full w-8 h-8"
+					src={icon.src}
+					width={icon.width}
+					height={icon.height}
+					alt={t('meta.logoAlt')}
+					fetchpriority="high"
+				/>
+				<span class="text-sm font-bold md:text-base">{t('meta.siteTitle')}</span>
+			</a>
+			<div class="flex flex-row items-center gap-4 md:gap-8">
+				<nav class="hidden md:flex flex-row gap-x-10 text-white/70">
+					{nav.map(({ href, label }) => (
+						<a href={href} class="font-medium hover:text-orange-500" data-astro-prefetch>
+							{label}
+						</a>
+					))}
+				</nav>
+				<LanguagePicker lang={lang} />
+			</div>
+		</div>
+	</div>
+</header>

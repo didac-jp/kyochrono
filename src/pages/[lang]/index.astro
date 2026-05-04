@@ -1,0 +1,22 @@
+---
+import About from '../../components/About.astro';
+import DecadeGallery from '../../components/DecadeGallery.astro';
+import Layout from '../../layouts/Layout.astro';
+import { supportedLangs } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+export function getStaticPaths() {
+	return supportedLangs.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+---
+
+<Layout title={t('meta.siteTitle')} lang={lang}>
+	<main>
+		<DecadeGallery />
+		<About />
+	</main>
+</Layout>

@@ -1,0 +1,19 @@
+---
+import { getTagCatalogEntries } from '../../../utils/tags';
+import { catalogTag } from '../../../utils/routes';
+import { supportedLangs } from '../../../i18n/utils';
+import type { Lang } from '../../../i18n/ui';
+
+export async function getStaticPaths() {
+	const entries = await getTagCatalogEntries();
+	return entries.flatMap(({ tagSlug }) =>
+		supportedLangs.map((lang) => ({
+			params: { lang, tagSlug },
+		})),
+	);
+}
+
+const lang = Astro.params.lang as Lang;
+const tagSlug = Astro.params.tagSlug!;
+return Astro.redirect(catalogTag(lang, tagSlug), 301);
+---

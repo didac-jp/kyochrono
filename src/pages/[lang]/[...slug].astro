@@ -1,0 +1,228 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Works from '../../components/Works.astro';
+import UpButton from '../../components/UpButton.astro';
+import BackButton from '../../components/BackButton.astro';
+import WorkLinkCard from '../../components/WorkLinkCard.astro';
+import SearchBar from '../../components/SearchBar.astro';
+import type { CollectionEntry } from 'astro:content';
+import { getWorksByDecade } from '../../utils/decades';
+import { getWorksBySeries, seriesHue } from '../../utils/series';
+import {
+	getTagCatalogEntries,
+	catalogTagCatchallSlug,
+	CATALOG_TAG_SLUG_PREFIX,
+	sortWorksByTitle,
+} from '../../utils/tags';
+import { dateSortKey } from '../../utils/date';
+import { supportedLangs, interpolate, useTranslations } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+import { homePath } from '../../utils/routes';
+
+export async function getStaticPaths() {
+	const map = await getWorksByDecade();
+	const tagEntries = await getTagCatalogEntries();
+	const out: Array<{
+		params: { lang: Lang; slug: string };
+		props?: {
+			works?: CollectionEntry<'works'>[];
+			tagLabel?: string;
+			tagWorks?: CollectionEntry<'works'>[];
+		};
+	}> = [];
+	for (const lang of supportedLangs) {
+		out.push({ params: { lang, slug: 'catalog/animes' } });
+		for (const [decade, works] of map) {
+			out.push({
+				params: { lang, slug: `catalog/decade/${decade}` },
+				props: { works },
+			});
+		}
+		for (const { tagSlug, tagLabel, works } of tagEntries) {
+			out.push({
+				params: { lang, slug: catalogTagCatchallSlug(tagSlug) },
+				props: { tagLabel, tagWorks: works },
+			});
+		}
+	}
+	return out;
+}
+
+interface Props {
+	works?: CollectionEntry<'works'>[];
+	tagLabel?: string;
+	tagWorks?: CollectionEntry<'works'>[];
+}
+
+function decadeHeading(key: string, t: (k: string) => string): { eyebrow: string; title: string } {
+	const match = key.match(/^(\d{4})s$/);
+	if (match) {
+		const start = parseInt(match[1], 10);
+		return {
+			eyebrow: `${start}–${start + 9}`,
+			title: key,
+		};
+	}
+	return {
+		eyebrow: t('catalog.catalogEyebrow'),
+		title: key === 'unknown' ? t('catalog.undated') : key,
+	};
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+
+const rawSlug = Astro.params.slug;
+const { works: decadeWorks, tagLabel, tagWorks } = Astro.props as Props;
+
+const isTagSlug = typeof rawSlug === 'string' && rawSlug.startsWith(CATALOG_TAG_SLUG_PREFIX);
+if (
+	rawSlug !== 'catalog/animes' &&
+	!(typeof rawSlug === 'string' && rawSlug.startsWith('catalog/decade/')) &&
+	!isTagSlug
+) {
+	return Astro.redirect('/404');
+}
+
+if (isTagSlug && (!tagLabel?.trim() || !tagWorks?.length)) {
+	return Astro.redirect(homePath(lang));
+}
+
+let pageTitle: string;
+let view: 'series' | 'decade' | 'tag';
+
+let decadeEyebrow = '';
+let decadeTitle = '';
+let worksForDecade: CollectionEntry<'works'>[] = [];
+let worksForTag: CollectionEntry<'works'>[] = [];
+
+let sections: {
+	key: string;
+	label: string;
+	works: CollectionEntry<'works'>[];
+}[] = [];
+
+if (rawSlug === 'catalog/animes') {
+	view = 'series';
+	pageTitle = `${t('catalog.animesTitle')}${t('meta.titleSuffix')}`;
+	const bySeries = await getWorksBySeries();
+	const seriesKeys = [...bySeries.keys()].sort((a, b) => {
+		if (a === '_standalone') return 1;
+		if (b === '_standalone') return -1;
+		return a.localeCompare(b);
+	});
+	sections = seriesKeys
+		.map((key) => {
+			const w = (bySeries.get(key) ?? [])
+				.slice()
+				.sort((a, b) => dateSortKey(a.data.date) - dateSortKey(b.data.date));
+			return {
+				key,
+				label: key === '_standalone' ? t('catalog.standalone') : key,
+				works: w,
+			};
+		})
+		.filter((s) => s.works.length > 0);
+} else if (isTagSlug) {
+	view = 'tag';
+	const label = tagLabel ?? '';
+	pageTitle = `${interpolate(t('catalog.tagPageTitle'), { tag: label })}${t('meta.titleSuffix')}`;
+	worksForTag = sortWorksByTitle(tagWorks ?? []);
+} else {
+	view = 'decade';
+	const decadeKey = (rawSlug as string).slice('catalog/decade/'.length);
+	const h = decadeHeading(decadeKey, t);
+	decadeEyebrow = h.eyebrow;
+	decadeTitle = h.title;
+	pageTitle = `${decadeTitle}${t('meta.titleSuffix')}`;
+	worksForDecade = decadeWorks ?? [];
+}
+---
+
+<Layout title={pageTitle} lang={lang}>
+	<main>
+		{view === 'series' && (
+			<>
+				<div class="max-w-6xl mx-auto pt-10 px-4">
+					<BackButton href={homePath(lang)} label={t('back.home')} />
+
+					<header class="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+						<div class="space-y-1 min-w-0">
+							<p class="text-xs uppercase tracking-[0.3em] text-white/40">{t('catalog.seriesEyebrow')}</p>
+							<h1 class="text-white text-5xl font-bold tracking-tight">{t('catalog.animesTitle')}</h1>
+						</div>
+						<SearchBar variant="header" placeholder={t('search.placeholder')} />
+					</header>
+				</div>
+
+				<div class="max-w-6xl mx-auto px-4 mt-12 pb-14 space-y-16">
+					{sections.map(({ key, label, works }) => {
+						const hue = key !== '_standalone' ? seriesHue(key) : null;
+						return (
+							<section aria-labelledby={`series-${key}`} data-series-section>
+								<h2
+									id={`series-${key}`}
+									class="text-xl font-semibold tracking-wide text-white mb-6 pb-2 border-b border-white/10"
+									style={hue !== null ? `color: hsl(${hue}, 60%, 78%); border-color: hsla(${hue}, 50%, 50%, 0.25);` : undefined}
+								>
+									{label}
+								</h2>
+								<ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+									{works.map(({ id, data: { title, img, date, series } }) => {
+										const cardHue = series ? seriesHue(series) : null;
+										return (
+											<li data-catalog-item data-title={title} data-series={series ?? ''}>
+												<WorkLinkCard
+													id={id}
+													title={title}
+													img={img}
+													date={date}
+													hue={cardHue}
+													variant="catalog"
+												/>
+											</li>
+										);
+									})}
+								</ul>
+							</section>
+						);
+					})}
+				</div>
+
+				<UpButton />
+			</>
+		)}
+
+		{view === 'decade' && (
+			<>
+				<div class="max-w-6xl mx-auto pt-10 px-4">
+					<BackButton href={homePath(lang)} label={t('back.home')} />
+
+					<header class="mt-6 space-y-1">
+						<p class="text-xs uppercase tracking-[0.3em] text-white/40">{decadeEyebrow}</p>
+						<h1 class="text-white text-5xl font-bold tracking-tight">{decadeTitle}</h1>
+					</header>
+				</div>
+
+				<Works works={worksForDecade} />
+			</>
+		)}
+
+		{view === 'tag' && (
+			<>
+				<div class="max-w-6xl mx-auto pt-10 px-4">
+					<BackButton href={homePath(lang)} label={t('back.home')} />
+
+					<header class="mt-6 space-y-1">
+						<p class="text-xs uppercase tracking-[0.3em] text-white/40">{t('catalog.catalogEyebrow')}</p>
+						<h1 class="text-white text-5xl font-bold tracking-tight">
+							{interpolate(t('catalog.tagPageTitle'), { tag: tagLabel ?? '' })}
+						</h1>
+					</header>
+				</div>
+
+				<Works works={worksForTag} />
+			</>
+		)}
+	</main>
+</Layout>

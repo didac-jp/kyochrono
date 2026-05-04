@@ -1,0 +1,44 @@
+---
+if (!import.meta.env.PROD) {
+	const accept = Astro.request.headers.get('accept-language') ?? '';
+	const prefersEs =
+		/^es\b/i.test(accept) ||
+		accept.split(',').some((part) => {
+			const code = part.trim().split(';')[0]?.toLowerCase() ?? '';
+			return code === 'es' || code.startsWith('es-');
+		});
+	return Astro.redirect(prefersEs ? '/es/' : '/en/', 302);
+}
+---
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Redirecting…</title>
+		<script is:inline>
+			(function () {
+				var list =
+					typeof navigator !== 'undefined' && navigator.languages && navigator.languages.length
+						? navigator.languages.slice()
+						: [
+								typeof navigator !== 'undefined' && navigator.language
+									? navigator.language
+									: 'en',
+							];
+				var es = list.some(function (raw) {
+					var l = String(raw || '')
+						.toLowerCase()
+						.trim()
+						.split(',')[0];
+					return l === 'es' || l.indexOf('es-') === 0;
+				});
+				location.replace(es ? '/es/' : '/en/');
+			})();
+		</script>
+		<noscript>
+			<meta http-equiv="refresh" content="0;url=/en/" />
+		</noscript>
+	</head>
+	<body></body>
+</html>
