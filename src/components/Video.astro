@@ -1,0 +1,61 @@
+---
+import { getLangFromUrl, interpolate, useTranslations } from '../i18n/utils';
+
+interface Props {
+	id: string;
+	title: string;
+	type: 'youtube' | 'animethemes';
+	showTitle?: boolean;
+}
+const { id, title, type, showTitle = true } = Astro.props;
+const thumbnail =
+	type === 'youtube' ? `https://i.ytimg.com/vi/${id}/maxresdefault.jpg` : null;
+
+const t = useTranslations(getLangFromUrl(Astro.url));
+const thumbAlt = interpolate(t('video.thumbnailAlt'), { title });
+const playLabel = interpolate(t('video.playAria'), { title });
+---
+
+<div class="space-y-4">
+	<div
+		class="rounded-2xl overflow-hidden border border-white/10 aspect-[16/9] w-full relative group/video"
+		data-video-id={id}
+		data-video-title={title}
+		data-video-type={type}
+	>
+		{type === 'youtube' && (
+			<img
+				src={thumbnail!}
+				alt={thumbAlt}
+				loading="lazy"
+				decoding="async"
+				class="absolute inset-0 w-full h-full object-cover transition-[filter] duration-300 group-hover/video:brightness-75"
+			/>
+		)}
+
+		{type === 'animethemes' && (
+			<div class="absolute inset-0 bg-black/80 flex items-center justify-center">
+				<span class="text-white/20 text-xs uppercase tracking-widest select-none">{t('video.animethemes')}</span>
+			</div>
+		)}
+
+		<button type="button" aria-label={playLabel} class="absolute inset-0 flex items-center justify-center cursor-pointer">
+			<span class="flex items-center justify-center w-16 h-16 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm transition-transform duration-200 group-hover/video:scale-110 group-hover/video:bg-white/20">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="white"
+					class="w-7 h-7 translate-x-0.5"
+					aria-hidden="true"
+				>
+					<path d="M8 5.14v14l11-7-11-7z" />
+				</svg>
+			</span>
+		</button>
+	</div>
+	{showTitle && <span class="text-white/50 text-sm font-semibold tracking-[0.2em] uppercase block">{title}</span>}
+</div>
+
+<script>
+	import '../scripts/video.js';
+</script>

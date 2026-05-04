@@ -1,0 +1,114 @@
+---
+import BackButton from '../../../components/BackButton.astro';
+import { catalogDecade, homePath } from '../../../utils/routes';
+import WorkCover from '../../../components/id/WorkCover.astro';
+import WorkInfo from '../../../components/id/WorkInfo.astro';
+import WorkTags from '../../../components/id/WorkTags.astro';
+import WorkVideos from '../../../components/id/WorkVideos.astro';
+import Layout from '../../../layouts/Layout.astro';
+import { getImage } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import { supportedLangs } from '../../../i18n/utils';
+import type { Lang } from '../../../i18n/ui';
+import { useTranslations } from '../../../i18n/utils';
+
+export async function getStaticPaths() {
+	const works = await getCollection('works');
+	return works.flatMap((work) =>
+		supportedLangs.map((lang) => ({
+			params: { lang, id: work.id },
+			props: { work },
+		})),
+	);
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+
+const { work } = Astro.props;
+const { data, id } = work;
+const {
+	title,
+	description,
+	descriptionEs,
+	img,
+	link,
+	imgLink,
+	date,
+	tags,
+	anilist,
+	videos,
+	hashtag,
+	hashtag_lnk,
+	bso,
+} = data;
+
+const descriptionForLang =
+	lang === 'es' && descriptionEs && descriptionEs.trim() !== '' ? descriptionEs : description;
+
+const trimmedDesc = descriptionForLang.trim().replace(/\s+/g, ' ');
+const metaDescription =
+	trimmedDesc.length <= 160
+		? trimmedDesc
+		: `${trimmedDesc.slice(0, 159).trimEnd()}…`;
+
+let ogImage: string | undefined;
+if (Astro.site) {
+	const { src } = await getImage({ src: img, width: 1200, format: 'webp' });
+	ogImage = new URL(src, Astro.site).href;
+}
+
+const yearMatch = date.match(/\d{4}/);
+const decade = yearMatch ? `${Math.floor(parseInt(yearMatch[0]) / 10) * 10}s` : null;
+
+type VideoEntry = { id: string; title: string; type: 'youtube' | 'animethemes' };
+const videoGroups: [string, VideoEntry[]][] = videos
+	? Object.entries(
+			videos.reduce((acc: Record<string, VideoEntry[]>, v: VideoEntry) => {
+				(acc[v.title] ??= []).push(v);
+				return acc;
+			}, {}),
+		)
+	: [];
+---
+
+<Layout
+	title={`${title}${t('meta.titleSuffix')}`}
+	lang={lang}
+	description={metaDescription}
+	ogImage={ogImage}
+>
+	<section class="max-w-6xl mx-auto py-8 md:py-10 px-4 flex flex-col gap-5">
+		<header class="space-y-3">
+			<BackButton
+				smartBack
+				href={decade ? catalogDecade(lang, decade) : homePath(lang)}
+				label={t('back.back')}
+			/>
+			<h1 class="text-white text-3xl md:text-4xl font-semibold tracking-wide">
+				{title}
+			</h1>
+		</header>
+
+		<div class="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,3fr)] items-stretch">
+			<div class="flex flex-col gap-4">
+				<WorkCover img={img} title={title} slug={id} />
+				<WorkTags tags={tags} lang={lang} />
+			</div>
+
+			<WorkInfo
+				description={descriptionForLang}
+				date={date}
+				title={title}
+				hashtag={hashtag}
+				hashtag_lnk={hashtag_lnk}
+				bso={bso}
+				anilist={anilist}
+				imgLink={imgLink}
+				link={link}
+			/>
+		</div>
+
+		<WorkVideos videoGroups={videoGroups} />
+	</section>
+</Layout>

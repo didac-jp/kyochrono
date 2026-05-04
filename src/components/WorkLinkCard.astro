@@ -1,0 +1,86 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { getLangFromUrl } from '../i18n/utils';
+import { workDetailPath } from '../utils/routes';
+
+type WorkData = CollectionEntry<'works'>['data'];
+
+interface Props {
+	id: string;
+	title: string;
+	img: WorkData['img'];
+	date: string;
+	series?: WorkData['series'];
+	hue: number | null;
+	variant: 'catalog' | 'timeline' | 'timeline-mobile';
+	timelineReverse?: boolean;
+}
+
+const {
+	id,
+	title,
+	img,
+	date,
+	series,
+	hue,
+	variant,
+	timelineReverse = false,
+} = Astro.props;
+
+const lang = getLangFromUrl(Astro.url);
+const workHref = workDetailPath(lang, id);
+
+const accentStyle =
+	hue === null
+		? ''
+		: variant === 'timeline' && timelineReverse
+			? `border-right: 2px solid hsla(${hue}, 55%, 50%, 0.5);`
+			: `border-left: 2px solid hsla(${hue}, 55%, 50%, 0.5);`;
+
+const hoverBgVar =
+	hue !== null
+		? `--card-hover-bg: hsla(${hue}, 60%, 70%, 0.15);`
+		: `--card-hover-bg: rgba(255, 255, 255, 0.06);`;
+
+const linkStyle = [accentStyle, hoverBgVar].filter(Boolean).join(' ');
+
+const classCatalog =
+	`group flex gap-3 bg-black/40 border border-white/10 rounded-xl p-3 transition-all hover:border-white/30 hover:shadow-[0_8px_32px_rgba(0,0,0,0.45)]`;
+
+const classTimeline =
+	`group flex gap-3 bg-black/40 border border-white/10 rounded-xl p-3 transition-all hover:border-white/30 hover:shadow-[0_8px_32px_rgba(0,0,0,0.45)]${timelineReverse ? ' ml-auto flex-row-reverse text-right' : ''}`;
+
+const classTimelineMobile = 'group flex gap-3 bg-black/40 border border-white/10 rounded-xl p-3 flex-1';
+
+const linkClass =
+	variant === 'catalog' ? classCatalog : variant === 'timeline-mobile' ? classTimelineMobile : classTimeline;
+
+const imageTransition = variant === 'catalog' || variant === 'timeline';
+---
+
+<a
+	href={workHref}
+	class:list={[linkClass, 'hover:[background-color:var(--card-hover-bg)]']}
+	style={linkStyle}
+>
+	{img && (
+		<Image
+			transition:name={imageTransition ? `img-${id}` : undefined}
+			src={img}
+			alt={title}
+			width={56}
+			height={80}
+			decoding="async"
+			class="w-14 h-20 object-cover rounded-lg shrink-0"
+			loading="lazy"
+		/>
+	)}
+	<div class="flex flex-col justify-center min-w-0">
+		<h3 class="text-white text-sm font-semibold tracking-wide leading-tight line-clamp-2">{title}</h3>
+		<p class="text-white/40 text-xs mt-1">{date}</p>
+		{(variant === 'timeline' || variant === 'timeline-mobile') && series && (
+			<p class="text-xs mt-1 truncate" style={`color: hsla(${hue}, 60%, 70%, 0.8);`}>{series}</p>
+		)}
+	</div>
+</a>

@@ -1,0 +1,43 @@
+---
+import MagniGlassIcon from '../icons/magni-glass.svg?raw';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+interface Props {
+	variant?: 'page' | 'header';
+	inputId?: string;
+	autoAttachCatalogFilter?: boolean;
+	placeholder?: string;
+}
+
+const { variant = 'page', inputId = 'works-filter', autoAttachCatalogFilter = true, placeholder: placeholderProp } =
+	Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const placeholder = placeholderProp ?? t('search.placeholder');
+
+const rootClass =
+	variant === 'header'
+		? 'shrink-0 min-w-0 w-full sm:w-auto sm:max-w-md'
+		: 'max-w-6xl mx-auto px-4 mt-8 flex justify-center';
+---
+
+<div class:list={[rootClass]}>
+	<div class="relative w-full">
+		<span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none text-sm">
+			<Fragment set:html={MagniGlassIcon} />
+		</span>
+		<input
+			id={inputId}
+			type="text"
+			placeholder={placeholder}
+			autocomplete="off"
+			class="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
+		/>
+	</div>
+</div>
+
+{autoAttachCatalogFilter && (
+	<script>
+		import '../scripts/search-bar.js';
+	</script>
+)}

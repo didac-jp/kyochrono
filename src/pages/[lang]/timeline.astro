@@ -1,0 +1,145 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import BackButton from '../../components/BackButton.astro';
+import UpButton from '../../components/UpButton.astro';
+import WorkLinkCard from '../../components/WorkLinkCard.astro';
+import { getCollection } from 'astro:content';
+import { seriesHue } from '../../utils/series';
+import { dateSortKey } from '../../utils/date';
+import { supportedLangs } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+import { homePath } from '../../utils/routes';
+
+export function getStaticPaths() {
+	return supportedLangs.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+
+const allWorks = await getCollection('works');
+const works = allWorks.sort((a, b) => dateSortKey(a.data.date) - dateSortKey(b.data.date));
+
+type YearGroup = {
+	year: string;
+	items: typeof works;
+};
+
+const groups: YearGroup[] = [];
+let currentYear = '';
+
+for (const work of works) {
+	const year = work.data.date.match(/\d{4}/)?.[0] ?? t('timeline.unknownYear');
+	if (year !== currentYear) {
+		currentYear = year;
+		groups.push({ year, items: [] });
+	}
+	groups.at(-1)!.items.push(work);
+}
+---
+
+<Layout title={`${t('timeline.pageTitle')}${t('meta.titleSuffix')}`} lang={lang}>
+	<main>
+		<div class="max-w-4xl mx-auto pt-10 px-4">
+			<BackButton href={homePath(lang)} label={t('back.home')} />
+
+			<header class="mt-6 space-y-1">
+				<p class="text-xs uppercase tracking-[0.3em] text-white/40">{t('timeline.eyebrow')}</p>
+				<h1 class="text-white text-5xl font-bold tracking-tight">{t('timeline.title')}</h1>
+			</header>
+		</div>
+
+		<div class="max-w-4xl mx-auto px-4 mt-12 pb-14">
+			<div class="timeline-container relative">
+				{groups.map(({ year, items }) => (
+					<div class="relative">
+						<div class="year-marker flex items-center gap-4 mb-8 relative z-10">
+							<span class="w-4 h-4 rounded-full bg-fuchsia-500 border-4 border-neutral-900 shrink-0 ml-[7px] md:ml-0 md:left-1/2 md:-translate-x-1/2 md:absolute" />
+							<span class="text-white text-2xl font-bold tracking-tight ml-6 md:ml-0 md:pl-[calc(50%+2rem)]">
+								{year}
+							</span>
+						</div>
+
+						{items.map(({ id, data: { title, img, date, series } }, i) => {
+							const hue = series ? seriesHue(series) : null;
+							const isLeft = i % 2 === 0;
+							return (
+								<div class="timeline-item relative mb-8 md:mb-10" data-scroll-card>
+									<div class="md:hidden flex items-start gap-4 ml-[18px]">
+										<div class="relative mt-2 shrink-0">
+											<span
+												class="block w-2 h-2 rounded-full"
+												style={hue !== null ? `background: hsl(${hue}, 55%, 55%);` : 'background: rgba(255,255,255,0.3);'}
+											/>
+										</div>
+										<WorkLinkCard
+											id={id}
+											title={title}
+											img={img}
+											date={date}
+											series={series}
+											hue={hue}
+											variant="timeline-mobile"
+										/>
+									</div>
+
+									<div class={`hidden md:grid md:grid-cols-[1fr_2rem_1fr] items-center`}>
+										<div class={isLeft ? '' : 'order-3'}>
+											<WorkLinkCard
+												id={id}
+												title={title}
+												img={img}
+												date={date}
+												series={series}
+												hue={hue}
+												variant="timeline"
+												timelineReverse={isLeft}
+											/>
+										</div>
+
+										<div class="flex justify-center order-2">
+											<span
+												class="block w-2.5 h-2.5 rounded-full"
+												style={hue !== null ? `background: hsl(${hue}, 55%, 55%);` : 'background: rgba(255,255,255,0.3);'}
+											/>
+										</div>
+
+										<div class={isLeft ? 'order-3' : ''} />
+									</div>
+								</div>
+							);
+						})}
+					</div>
+				))}
+			</div>
+		</div>
+
+		<UpButton />
+	</main>
+</Layout>
+
+<style>
+	.timeline-container::before {
+		content: '';
+		position: absolute;
+		left: 14px;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background: linear-gradient(
+			to bottom,
+			transparent,
+			rgba(255 255 255 / 0.1) 2rem,
+			rgba(255 255 255 / 0.1) calc(100% - 2rem),
+			transparent
+		);
+	}
+
+	@media (min-width: 768px) {
+		.timeline-container::before {
+			left: 50%;
+			transform: translateX(-50%);
+		}
+	}
+</style>
