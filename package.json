@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "PUBLIC_SITE_URL=https://kyochrono.dev astro build",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "astro": "^6.1.1",
     "astro-leaflet": "^1.10.0",
+    "astro-seo": "^1.1.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.2"
   },
