@@ -6,6 +6,7 @@ import "../styles/global.css";
 import '@fontsource-variable/onest';
 import { ClientRouter } from 'astro:transitions';
 import favicon from '../assets/logo.svg?url';
+import { SEO } from 'astro-seo';
 import { getLangFromUrl, useTranslations } from '../i18n/utils';
 import type { Lang } from '../i18n/ui';
 
@@ -14,16 +15,46 @@ interface Props {
 	lang?: Lang;
 	description?: string;
 	ogImage?: string;
+	ogImageAlt?: string;
 }
 
-const { title = 'A KyoAni Chronicle', lang: langProp, description: descriptionProp, ogImage } =
-	Astro.props;
+const {
+	title = 'A KyoAni Chronicle',
+	lang: langProp,
+	description: descriptionProp,
+	ogImage,
+	ogImageAlt,
+} = Astro.props;
 const urlLang = getLangFromUrl(Astro.url);
 const lang = langProp ?? urlLang;
 const t = useTranslations(lang);
 const metaDescription = descriptionProp ?? t('meta.siteDescription');
-const canonicalHref = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
-const twitterCard = ogImage ? 'summary_large_image' : 'summary';
+
+const hasSite = Boolean(Astro.site);
+const canonicalForSeo = hasSite ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const defaultOgImage = hasSite ? new URL('/favicon.svg', Astro.site).href : undefined;
+const resolvedOgImage = ogImage ?? defaultOgImage;
+const imageAlt = ogImageAlt ?? t('meta.logoAlt');
+const useLargeTwitterCard = Boolean(ogImage);
+
+const openGraph = hasSite && resolvedOgImage
+	? {
+			basic: {
+				title,
+				type: 'website' as const,
+				image: resolvedOgImage,
+				url: canonicalForSeo,
+			},
+			optional: {
+				description: metaDescription,
+				siteName: t('meta.siteTitle'),
+				locale: lang === 'es' ? 'es_ES' : 'en_US',
+			},
+			image: {
+				alt: imageAlt,
+			},
+		}
+	: undefined;
 ---
 
 <!doctype html>
@@ -33,17 +64,21 @@ const twitterCard = ogImage ? 'summary_large_image' : 'summary';
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href={favicon} />
 		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-		<meta name="description" content={metaDescription} />
-		<meta property="og:title" content={title} />
-		<meta property="og:description" content={metaDescription} />
-		<meta property="og:type" content="website" />
-		{canonicalHref && <meta property="og:url" content={canonicalHref} />}
-		{ogImage && <meta property="og:image" content={ogImage} />}
-		<meta name="twitter:card" content={twitterCard} />
-		<meta name="twitter:title" content={title} />
-		<meta name="twitter:description" content={metaDescription} />
-		{canonicalHref && <link rel="canonical" href={canonicalHref} />}
+		<SEO
+			title={title}
+			description={metaDescription}
+			canonical={canonicalForSeo}
+			openGraph={openGraph}
+			twitter={{
+				card: useLargeTwitterCard ? 'summary_large_image' : 'summary',
+				title,
+				description: metaDescription,
+				...(resolvedOgImage && {
+					image: resolvedOgImage,
+					imageAlt,
+				}),
+			}}
+		/>
 		<ClientRouter />
 	</head>
 	<body>

@@ -2,15 +2,10 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
-const env = /** @type {any} */ (globalThis).process?.env ?? {};
-const publicSiteUrl =
-	typeof env.PUBLIC_SITE_URL === 'string' && env.PUBLIC_SITE_URL.trim() !== ''
-		? env.PUBLIC_SITE_URL.trim()
-		: undefined;
+const DEFAULT_SITE_URL = 'https://kyochrono.dev';
 
-// https://astro.build/config
 export default defineConfig({
-	...(publicSiteUrl ? { site: publicSiteUrl } : {}),
+	site: DEFAULT_SITE_URL,
 	prefetch: {
 		prefetchAll: false,
 		defaultStrategy: 'tap',
