@@ -5,12 +5,6 @@ import { tagToSlug } from './routes';
 export type WorkEntry = CollectionEntry<'works'>;
 export const CATALOG_TAG_SLUG_PREFIX = 'catalog/tag/';
 
-export function sortWorksByTitle(works: WorkEntry[]): WorkEntry[] {
-	return works.slice().sort((a, b) =>
-		a.data.title.localeCompare(b.data.title),
-	);
-}
-
 export function catalogTagCatchallSlug(tagSlug: string): string {
 	return `${CATALOG_TAG_SLUG_PREFIX}${tagSlug}`;
 }

@@ -90,6 +90,9 @@ const en = {
 	'catalog.catalogEyebrow': 'Catalog',
 	'catalog.undated': 'Undated',
 	'catalog.standalone': 'Standalone',
+	'catalog.decadesRow': 'Decades',
+	'catalog.tagsRow': 'Tags',
+	'catalog.filterAll': 'All',
 	'catalog.tagPageTitle': 'Works: {tag}',
 	'catalog.tagAriaLabel': 'Browse works tagged {tag}',
 
@@ -211,6 +214,9 @@ const es: Record<keyof typeof en, string> = {
 	'catalog.catalogEyebrow': 'Catálogo',
 	'catalog.undated': 'Sin fecha',
 	'catalog.standalone': 'Independientes',
+	'catalog.decadesRow': 'Décadas',
+	'catalog.tagsRow': 'Etiquetas',
+	'catalog.filterAll': 'Todas',
 	'catalog.tagPageTitle': 'Obras: {tag}',
 	'catalog.tagAriaLabel': 'Explorar obras con la etiqueta {tag}',
 

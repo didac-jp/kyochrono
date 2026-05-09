@@ -1,3 +1,9 @@
+import EmblaCarousel from 'embla-carousel';
+import '../hscroll-drag.js';
+
+/** @type {WeakMap<HTMLElement, { destroy: () => void }>} */
+const ytmusicEmblaInstances = new WeakMap();
+
 let descToggleAbort;
 
 function initDescToggle() {
@@ -56,41 +62,20 @@ function initDescToggle() {
 	document.fonts.ready.then(() => check());
 }
 
-document.addEventListener('astro:page-load', initDescToggle);
-
-function initHScroll() {
-	document.querySelectorAll('[data-hscroll]').forEach((el) => {
-		let didDrag = false;
-
-		el.addEventListener('dragstart', (e) => e.preventDefault());
-		el.addEventListener('mousedown', (e) => {
-			const startX = e.clientX;
-			const scrollStart = el.scrollLeft;
-			didDrag = false;
-
-			const onMove = (e) => {
-				const dx = e.clientX - startX;
-				if (Math.abs(dx) > 4) didDrag = true;
-				el.scrollLeft = scrollStart - dx;
-			};
-
-			const onUp = () => {
-				document.removeEventListener('mousemove', onMove);
-				document.removeEventListener('mouseup', onUp);
-			};
-
-			document.addEventListener('mousemove', onMove);
-			document.addEventListener('mouseup', onUp);
+function initWorkInfoYtmusicEmbla() {
+	document.querySelectorAll('[data-work-info-embla-viewport]').forEach((node) => {
+		if (!(node instanceof HTMLElement)) return;
+		ytmusicEmblaInstances.get(node)?.destroy();
+		const api = EmblaCarousel(node, {
+			align: 'start',
+			axis: 'x',
+			containScroll: 'trimSnaps',
+			dragFree: true,
+			skipSnaps: true,
 		});
-
-		el.addEventListener(
-			'click',
-			(e) => {
-				if (didDrag) e.preventDefault();
-			},
-			{ capture: true },
-		);
+		ytmusicEmblaInstances.set(node, api);
 	});
 }
 
-document.addEventListener('astro:page-load', initHScroll);
+document.addEventListener('astro:page-load', initDescToggle);
+document.addEventListener('astro:page-load', initWorkInfoYtmusicEmbla);

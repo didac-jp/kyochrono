@@ -1,8 +1,7 @@
 ---
 import { getWorksByDecade } from '../utils/decades';
 import { Image } from 'astro:assets';
-import { config } from '../utils/config';
-import { catalogDecade } from '../utils/routes';
+import { catalogAnimesDecade } from '../utils/routes';
 import { getLangFromUrl, interpolate, useTranslations } from '../i18n/utils';
 import ChevronLeftIcon from '../icons/chevron-left.svg?raw';
 
@@ -16,20 +15,48 @@ const preferredCoversByDecade: Record<string, string> = {
 	'2020s': 'city',
 };
 
-const decades = [...decadesMap.entries()]
-	.sort(([a], [b]) => a.localeCompare(b))
-	.map(([key, works]) => {
-		const preferredSlug = preferredCoversByDecade[key];
-		const coverWork = works.find((work) => work.id === preferredSlug) ?? works[0];
-		return {
-			key,
-			label: key,
-			count: works.length,
-			cover: coverWork.data.img,
-			coverTitle: coverWork.data.title,
-			yearRange: `${key.replace('s', '')}–${parseInt(key) + 9}`,
-		};
-	});
+function decadeYearRange(key: string): string {
+	const m = key.match(/^(\d{4})s$/);
+	if (m) {
+		const start = parseInt(m[1], 10);
+		return `${start}–${start + 9}`;
+	}
+	return key === 'unknown' ? t('catalog.undated') : key;
+}
+
+function decadeCardFromWorks(key: string, works: NonNullable<ReturnType<typeof decadesMap.get>>) {
+	const preferredSlug = preferredCoversByDecade[key];
+	const coverWork = works.find((work) => work.id === preferredSlug) ?? works[0];
+	return {
+		key,
+		label: key,
+		count: works.length,
+		cover: coverWork.data.img,
+		coverTitle: coverWork.data.title,
+		yearRange: decadeYearRange(key),
+	};
+}
+
+const showcaseOrder = ['2000s', '2010s', '2020s'] as const;
+const decadesShowcase: ReturnType<typeof decadeCardFromWorks>[] = [];
+const usedKeys = new Set<string>();
+for (const key of showcaseOrder) {
+	const works = decadesMap.get(key);
+	if (!works?.length) continue;
+	decadesShowcase.push(decadeCardFromWorks(key, works));
+	usedKeys.add(key);
+	if (decadesShowcase.length >= 3) break;
+}
+if (decadesShowcase.length < 3) {
+	const rest = [...decadesMap.entries()]
+		.sort(([a], [b]) => a.localeCompare(b))
+		.filter(([k]) => !usedKeys.has(k));
+	for (const [key, works] of rest) {
+		if (decadesShowcase.length >= 3) break;
+		decadesShowcase.push(decadeCardFromWorks(key, works));
+		usedKeys.add(key);
+	}
+}
 ---
 
 <section class="max-w-6xl mx-auto py-16 sm:py-20 lg:py-24">
@@ -63,9 +90,9 @@ const decades = [...decadesMap.entries()]
 
 		<div>
 			<div class="grid gap-3 sm:gap-4 max-w-[520px] lg:ml-auto">
-				{decades.slice(0, 3).map(({ key, label, count, cover, coverTitle, yearRange }, i) => (
+				{decadesShowcase.map(({ key, label, count, cover, coverTitle, yearRange }, i) => (
 					<a
-						href={catalogDecade(lang, key)}
+						href={catalogAnimesDecade(lang, key)}
 						aria-label={interpolate(t('landing.decadeAria'), { decade: label, range: yearRange })}
 						class:list={[
 							'group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]',

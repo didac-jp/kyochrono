@@ -1,6 +1,6 @@
 ---
 import BackButton from '../../../components/BackButton.astro';
-import { catalogDecade, homePath } from '../../../utils/routes';
+import { catalogAnimesDecade, homePath } from '../../../utils/routes';
 import WorkCover from '../../../components/id/WorkCover.astro';
 import WorkInfo from '../../../components/id/WorkInfo.astro';
 import WorkTags from '../../../components/id/WorkTags.astro';
@@ -83,7 +83,7 @@ const videoGroups: [string, VideoEntry[]][] = videos
 		<header class="space-y-3">
 			<BackButton
 				smartBack
-				href={decade ? catalogDecade(lang, decade) : homePath(lang)}
+				href={decade ? catalogAnimesDecade(lang, decade) : homePath(lang)}
 				label={t('back.back')}
 			/>
 			<h1 class="text-white text-3xl md:text-4xl font-semibold tracking-wide">

@@ -19,8 +19,22 @@ export function catalogAnimes(lang: Lang): string {
 	return useTranslatedPath(lang)('/catalog/animes/');
 }
 
-export function catalogDecade(lang: Lang, decade: string): string {
-	return useTranslatedPath(lang)(`/catalog/decade/${decade}/`);
+/** Query params for the unified catalog (decade key e.g. `2000s`, tag slug). */
+export function catalogAnimesQuery(lang: Lang, q: { decade?: string; tag?: string }): string {
+	const base = catalogAnimes(lang);
+	const params = new URLSearchParams();
+	if (q.decade) params.set('decade', q.decade);
+	if (q.tag) params.set('tag', q.tag);
+	const s = params.toString();
+	return s ? `${base}?${s}` : base;
+}
+
+export function catalogAnimesDecade(lang: Lang, decade: string): string {
+	return catalogAnimesQuery(lang, { decade });
+}
+
+export function catalogAnimesTag(lang: Lang, tagSlug: string): string {
+	return catalogAnimesQuery(lang, { tag: tagSlug });
 }
 
 export function workDetailPath(lang: Lang, id: string): string {
@@ -38,6 +52,3 @@ export function tagToSlug(tag: string): string {
 		.replace(/[^a-z0-9-]/g, '');
 }
 
-export function catalogTag(lang: Lang, tagSlug: string): string {
-	return useTranslatedPath(lang)(`/catalog/tag/${tagSlug}/`);
-}

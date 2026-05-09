@@ -1,6 +1,6 @@
 ---
 import { getTagCatalogEntries } from '../../../utils/tags';
-import { catalogTag } from '../../../utils/routes';
+import { catalogAnimesTag } from '../../../utils/routes';
 import { supportedLangs } from '../../../i18n/utils';
 import type { Lang } from '../../../i18n/ui';
 
@@ -15,5 +15,5 @@ export async function getStaticPaths() {
 
 const lang = Astro.params.lang as Lang;
 const tagSlug = Astro.params.tagSlug!;
-return Astro.redirect(catalogTag(lang, tagSlug), 301);
+return Astro.redirect(catalogAnimesTag(lang, tagSlug), 301);
 ---

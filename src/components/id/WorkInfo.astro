@@ -76,20 +76,23 @@ const imgAlt = interpolate(t('work.imgAlt'), { title });
 				<span class="text-white/50 uppercase tracking-[0.2em] text-xs shrink-0">
 					{t('work.soundtrack')}
 				</span>
-				<div
-					data-hscroll
-					class="flex gap-1.5 overflow-x-auto min-w-0 max-w-full py-1 -my-1 px-1 -mx-1 cursor-grab active:cursor-grabbing"
-					style="scrollbar-width: none;"
-				>
-					{bso.ytmusic.map((url, i) => (
-						<span class="shrink-0">
-							<Pill href={url} color="#FF0000">
-								<Fragment set:html={PlayCircleIcon} />
-								{t('work.ytMusic')}
-								{bso.ytmusic!.length > 1 && <span class="opacity-60 font-mono text-xs">{i + 1}</span>}
-							</Pill>
-						</span>
-					))}
+				<div class="-mx-1 min-w-0 max-w-full">
+					<div
+						class="embla__viewport overflow-hidden py-1 -my-1 px-1 cursor-grab active:cursor-grabbing"
+						data-work-info-embla-viewport
+					>
+						<div class="embla__container flex gap-1.5">
+							{bso.ytmusic.map((url, i) => (
+								<div class="embla__slide shrink-0 min-w-0">
+									<Pill href={url} color="#FF0000">
+										<Fragment set:html={PlayCircleIcon} />
+										{t('work.ytMusic')}
+										{bso.ytmusic!.length > 1 && <span class="opacity-60 font-mono text-xs">{i + 1}</span>}
+									</Pill>
+								</div>
+							))}
+						</div>
+					</div>
 				</div>
 			</div>
 		)}
@@ -126,6 +129,16 @@ const imgAlt = interpolate(t('work.imgAlt'), { title });
 		</a>
 	)}
 </aside>
+
+<style>
+	.embla__container {
+		touch-action: pan-y pinch-zoom;
+	}
+	.embla__slide {
+		flex: 0 0 auto;
+		min-width: 0;
+	}
+</style>
 
 <script>
 	import '../../scripts/id/work-info.js';
