@@ -1,0 +1,54 @@
+---
+interface Props {
+	decades: string[];
+	label?: string;
+}
+
+const { decades, label = 'Décadas' } = Astro.props;
+---
+
+<section class="space-y-2 min-w-0" aria-label={label}>
+	<p class="text-xs uppercase tracking-[0.3em] text-white/40">{label}</p>
+	<div class="-mx-1">
+		<div class="embla__viewport max-w-full min-w-0 overflow-x-auto overflow-y-hidden py-1 -my-1 px-1">
+			<div class="embla__container flex gap-2">
+				<div class="embla__slide shrink-0 min-w-0">
+					<button
+						type="button"
+						class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-2 text-sm text-white/75 hover:text-white hover:border-white/20 hover:bg-white/[0.05] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+						data-catalog-chip
+						data-catalog-chip-kind="decade"
+						data-decade=""
+						aria-pressed="false"
+					>
+						All
+					</button>
+				</div>
+				{decades.map((decade) => (
+					<div class="embla__slide shrink-0 min-w-0">
+						<button
+							type="button"
+							class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-2 text-sm text-white/75 hover:text-white hover:border-white/20 hover:bg-white/[0.05] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+							data-catalog-chip
+							data-catalog-chip-kind="decade"
+							data-decade={decade}
+							aria-pressed="false"
+						>
+							{decade}
+						</button>
+					</div>
+				))}
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.embla__container {
+		touch-action: pan-y pinch-zoom;
+	}
+	.embla__slide {
+		flex: 0 0 auto;
+		min-width: 0;
+	}
+</style>

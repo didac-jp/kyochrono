@@ -9,7 +9,7 @@ interface Props {
 	placeholder?: string;
 }
 
-const { variant = 'page', inputId = 'works-filter', autoAttachCatalogFilter = true, placeholder: placeholderProp } =
+const { variant = 'page', inputId = 'works-filter', placeholder: placeholderProp } =
 	Astro.props;
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -35,9 +35,3 @@ const rootClass =
 		/>
 	</div>
 </div>
-
-{autoAttachCatalogFilter && (
-	<script>
-		import '../scripts/search-bar.js';
-	</script>
-)}

@@ -4,8 +4,8 @@ import UpButton from '../../components/UpButton.astro';
 import BackButton from '../../components/BackButton.astro';
 import WorkLinkCard from '../../components/WorkLinkCard.astro';
 import SearchBar from '../../components/SearchBar.astro';
-import CatalogDecadeChips from '../../components/CatalogDecadeChips.astro';
-import CatalogTagChips from '../../components/CatalogTagChips.astro';
+import CatalogDecadeChips from '../../components/catalog/CatalogDecadeChips.astro';
+import CatalogTagChips from '../../components/catalog/CatalogTagChips.astro';
 import { getCollection } from 'astro:content';
 import { getWorksByDecade, getDecadeKey } from '../../utils/decades';
 import { getWorksBySeries, seriesHue } from '../../utils/series';
@@ -51,6 +51,9 @@ if (rawSlug !== 'catalog/animes') {
 
 const pageTitle = `${t('catalog.animesTitle')}${t('meta.titleSuffix')}`;
 
+const decadesMap = await getWorksByDecade();
+const tagEntries = await getTagCatalogEntries();
+
 const bySeries = await getWorksBySeries();
 const seriesKeys = [...bySeries.keys()].sort((a, b) => {
 	if (a === '_standalone') return 1;
@@ -85,12 +88,12 @@ const allWorks = (await getCollection('works'))
 					<p class="text-xs uppercase tracking-[0.3em] text-white/40">{t('catalog.seriesEyebrow')}</p>
 					<h1 class="text-white text-5xl font-bold tracking-tight">{t('catalog.animesTitle')}</h1>
 				</div>
-				<SearchBar variant="header" placeholder={t('search.placeholder')} />
+				<SearchBar variant="header" placeholder={t('search.placeholder')} autoAttachCatalogFilter={false} />
 			</header>
 
-			<div class="mt-10 space-y-6">
-				<CatalogDecadeChips />
-				<CatalogTagChips />
+			<div class="mt-10 grid gap-6 md:grid-cols-2 md:gap-8 md:items-start">
+				<CatalogDecadeChips decades={[...decadesMap.keys()].sort()} />
+				<CatalogTagChips tags={tagEntries} />
 			</div>
 		</div>
 
@@ -180,5 +183,5 @@ const allWorks = (await getCollection('works'))
 </Layout>
 
 <script>
-	import '../../scripts/catalog-filters.js';
+	import '../../scripts/catalog/filters.js';
 </script>

@@ -1,5 +1,4 @@
 import EmblaCarousel from 'embla-carousel';
-import '../hscroll-drag.js';
 
 /** @type {WeakMap<HTMLElement, { destroy: () => void }>} */
 const ytmusicEmblaInstances = new WeakMap();

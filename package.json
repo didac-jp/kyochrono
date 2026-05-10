@@ -17,6 +17,7 @@
     "astro": "^6.1.1",
     "astro-leaflet": "^1.10.0",
     "astro-seo": "^1.1.0",
+    "embla-carousel": "^8.6.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.2"
   },

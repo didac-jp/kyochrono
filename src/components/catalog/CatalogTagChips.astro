@@ -1,0 +1,67 @@
+---
+interface TagEntry {
+	tagSlug: string;
+	tagLabel: string;
+	works?: unknown[];
+}
+
+interface Props {
+	tags: TagEntry[];
+	label?: string;
+}
+
+const { tags, label = 'Tags' } = Astro.props;
+---
+
+<section class="space-y-2 min-w-0" aria-label={label}>
+	<p class="text-xs uppercase tracking-[0.3em] text-white/40">{label}</p>
+	<div class="-mx-1">
+		<div
+			class="embla__viewport max-w-full min-w-0 overflow-hidden py-1 -my-1 px-1 cursor-grab active:cursor-grabbing"
+			data-catalog-tag-embla-viewport
+		>
+			<div class="embla__container flex flex-nowrap gap-2">
+				<div class="embla__slide shrink-0 min-w-0">
+					<button
+						type="button"
+						class="inline-flex max-w-[80vw] min-w-0 items-center gap-2 overflow-hidden rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-2 text-sm text-white/75 hover:text-white hover:border-white/20 hover:bg-white/[0.05] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+						data-catalog-chip
+						data-catalog-chip-kind="tag"
+						data-tag=""
+						aria-pressed="false"
+					>
+						<span class="truncate">All</span>
+					</button>
+				</div>
+				{tags.map(({ tagSlug, tagLabel }) => (
+					<div class="embla__slide shrink-0 min-w-0">
+						<button
+							type="button"
+							class="inline-flex max-w-[80vw] min-w-0 items-center gap-2 overflow-hidden rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-2 text-sm text-white/75 hover:text-white hover:border-white/20 hover:bg-white/[0.05] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+							data-catalog-chip
+							data-catalog-chip-kind="tag"
+							data-tag={tagSlug}
+							aria-pressed="false"
+						>
+							<span class="truncate max-w-[12ch] sm:max-w-[16ch]">{tagLabel}</span>
+						</button>
+					</div>
+				))}
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.embla__container {
+		touch-action: pan-y pinch-zoom;
+	}
+	.embla__slide {
+		flex: 0 0 auto;
+		min-width: 0;
+	}
+</style>
+
+<script>
+	import '../../scripts/catalog/tag-chips-embla.js';
+</script>
