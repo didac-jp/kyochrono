@@ -4,7 +4,6 @@ import UpButton from '../../components/UpButton.astro';
 import BackButton from '../../components/BackButton.astro';
 import WorkLinkCard from '../../components/WorkLinkCard.astro';
 import SearchBar from '../../components/SearchBar.astro';
-import CatalogDecadeChips from '../../components/catalog/CatalogDecadeChips.astro';
 import CatalogTagChips from '../../components/catalog/CatalogTagChips.astro';
 import { getCollection } from 'astro:content';
 import { getWorksByDecade, getDecadeKey } from '../../utils/decades';
@@ -51,9 +50,6 @@ if (rawSlug !== 'catalog/animes') {
 
 const pageTitle = `${t('catalog.animesTitle')}${t('meta.titleSuffix')}`;
 
-const decadesMap = await getWorksByDecade();
-const tagEntries = await getTagCatalogEntries();
-
 const bySeries = await getWorksBySeries();
 const seriesKeys = [...bySeries.keys()].sort((a, b) => {
 	if (a === '_standalone') return 1;
@@ -76,6 +72,14 @@ const sections = seriesKeys
 const allWorks = (await getCollection('works'))
 	.slice()
 	.sort((a, b) => dateSortKey(a.data.date) - dateSortKey(b.data.date));
+
+const uniqueTagSet = new Set<string>();
+for (const work of allWorks) {
+	for (const tag of work.data.tags) uniqueTagSet.add(tag);
+}
+const catalogCatFilterEntries = [...uniqueTagSet]
+	.sort((a, b) => a.localeCompare(b))
+	.map((tagLabel) => ({ tagSlug: tagToSlug(tagLabel), tagLabel }));
 ---
 
 <Layout title={pageTitle} lang={lang}>
@@ -90,11 +94,11 @@ const allWorks = (await getCollection('works'))
 				</div>
 				<SearchBar variant="header" placeholder={t('search.placeholder')} autoAttachCatalogFilter={false} />
 			</header>
-
-			<div class="mt-10 grid gap-6 md:grid-cols-2 md:gap-8 md:items-start">
-				<CatalogDecadeChips decades={[...decadesMap.keys()].sort()} />
-				<CatalogTagChips tags={tagEntries} />
-			</div>
+			<CatalogTagChips
+				tags={catalogCatFilterEntries}
+				label={t('catalog.tagsRow')}
+				allLabel={t('catalog.filterAll')}
+			/>
 		</div>
 
 		<div
@@ -121,6 +125,7 @@ const allWorks = (await getCollection('works'))
 								data-series={series ?? ''}
 								data-decade={decade}
 								data-tags={tagSlugs}
+								data-cats={(tags ?? []).join(',')}
 							>
 								<WorkLinkCard
 									id={id}
@@ -159,7 +164,14 @@ const allWorks = (await getCollection('works'))
 										.join(' ');
 									const cardHue = series ? seriesHue(series) : null;
 									return (
-										<li data-catalog-item data-title={title} data-series={series ?? ''} data-decade={decade} data-tags={tagSlugs}>
+										<li
+											data-catalog-item
+											data-title={title}
+											data-series={series ?? ''}
+											data-decade={decade}
+											data-tags={tagSlugs}
+											data-cats={(tags ?? []).join(',')}
+										>
 											<WorkLinkCard
 												id={id}
 												title={title}
@@ -183,5 +195,5 @@ const allWorks = (await getCollection('works'))
 </Layout>
 
 <script>
-	import '../../scripts/catalog/filters.js';
+	import '../../scripts/catalog/catalog-filters.js';
 </script>
