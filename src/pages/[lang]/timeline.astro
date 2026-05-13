@@ -22,18 +22,21 @@ const allWorks = await getCollection('works');
 const works = allWorks.sort((a, b) => dateSortKey(a.data.date) - dateSortKey(b.data.date));
 
 type YearGroup = {
-	year: string;
+	yearAnchor: string;
+	yearLabel: string;
 	items: typeof works;
 };
 
 const groups: YearGroup[] = [];
-let currentYear = '';
+let lastAnchor = '';
 
 for (const work of works) {
-	const year = work.data.date.match(/\d{4}/)?.[0] ?? t('timeline.unknownYear');
-	if (year !== currentYear) {
-		currentYear = year;
-		groups.push({ year, items: [] });
+	const yearNum = work.data.date.match(/\d{4}/)?.[0] ?? null;
+	const yearAnchor = yearNum ?? 'unknown';
+	const yearLabel = yearNum ?? t('timeline.unknownYear');
+	if (yearAnchor !== lastAnchor) {
+		lastAnchor = yearAnchor;
+		groups.push({ yearAnchor, yearLabel, items: [] });
 	}
 	groups.at(-1)!.items.push(work);
 }
@@ -52,12 +55,16 @@ for (const work of works) {
 
 		<div class="max-w-4xl mx-auto px-4 mt-12 pb-14">
 			<div class="timeline-container relative">
-				{groups.map(({ year, items }) => (
-					<div class="relative">
+				{groups.map(({ yearAnchor, yearLabel, items }) => (
+					<div
+						class="relative scroll-mt-6"
+						id={`timeline-year-${yearAnchor}`}
+						data-timeline-year={yearAnchor}
+					>
 						<div class="year-marker flex items-center gap-4 mb-8 relative z-10">
 							<span class="w-4 h-4 rounded-full bg-fuchsia-500 border-4 border-neutral-900 shrink-0 ml-[7px] md:ml-0 md:left-1/2 md:-translate-x-1/2 md:absolute" />
 							<span class="text-white text-2xl font-bold tracking-tight ml-6 md:ml-0 md:pl-[calc(50%+2rem)]">
-								{year}
+								{yearLabel}
 							</span>
 						</div>
 

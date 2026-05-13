@@ -5,9 +5,11 @@ interface Props {
     href?: string;
     label?: string;
     smartBack?: boolean;
+    backCatalogSeriesKey?: string;
+    backTimelineYearAnchor?: string;
 }
 
-const { href, label, smartBack = false } = Astro.props;
+const { href, label, smartBack = false, backCatalogSeriesKey, backTimelineYearAnchor } = Astro.props;
 const resolvedHref = href ?? '/';
 const resolvedLabel = smartBack ? 'Back' : (label ?? 'Back');
 ---
@@ -15,6 +17,12 @@ const resolvedLabel = smartBack ? 'Back' : (label ?? 'Back');
 <a
     href={resolvedHref}
     {...(smartBack ? { 'data-smart-back': 'true' } : {})}
+    {...(smartBack && backCatalogSeriesKey !== undefined
+        ? { 'data-back-catalog-series': backCatalogSeriesKey }
+        : {})}
+    {...(smartBack && backTimelineYearAnchor !== undefined
+        ? { 'data-back-timeline-year': backTimelineYearAnchor }
+        : {})}
     class="inline-flex items-center gap-2 text-xs tracking-[0.3em] text-white/40 hover:text-white transition-colors group"
 >
     <span class="text-base leading-none group-hover:-translate-x-0.5 transition-transform duration-200">

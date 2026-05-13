@@ -60,6 +60,8 @@ if (Astro.site) {
 
 const yearMatch = date.match(/\d{4}/);
 const decade = yearMatch ? `${Math.floor(parseInt(yearMatch[0]) / 10) * 10}s` : null;
+const backCatalogSeriesKey = data.series ?? '_standalone';
+const backTimelineYearAnchor = yearMatch?.[0] ?? 'unknown';
 
 type VideoEntry = { id: string; title: string; type: 'youtube' | 'animethemes' };
 const videoGroups: [string, VideoEntry[]][] = videos
@@ -85,6 +87,8 @@ const videoGroups: [string, VideoEntry[]][] = videos
 				smartBack
 				href={decade ? catalogAnimesDecade(lang, decade) : homePath(lang)}
 				label={t('back.back')}
+				backCatalogSeriesKey={backCatalogSeriesKey}
+				backTimelineYearAnchor={backTimelineYearAnchor}
 			/>
 			<h1 class="text-white text-3xl md:text-4xl font-semibold tracking-wide">
 				{title}

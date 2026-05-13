@@ -142,12 +142,21 @@ const catalogCatFilterEntries = [...uniqueTagSet]
 			</ul>
 		</div>
 
-		<div class="max-w-6xl mx-auto px-4 mt-12 pb-14 space-y-16" data-catalog-franchise-root data-catalog-active-root>
+		<div
+			class="max-w-6xl mx-auto px-4 mt-12 pb-14 space-y-16 scroll-mt-16"
+			data-catalog-franchise-root
+			data-catalog-active-root
+		>
 			{
 				sections.map(({ key, label, works }) => {
 					const hue = key !== '_standalone' ? seriesHue(key) : null;
 					return (
-						<section aria-labelledby={`series-${key}`} data-series-section>
+						<section
+							class="scroll-mt-16"
+							aria-labelledby={`series-${key}`}
+							data-series-section
+							data-series-key={key}
+						>
 							<h2
 								id={`series-${key}`}
 								class="text-xl font-semibold tracking-wide text-white mb-6 pb-2 border-b border-white/10"
